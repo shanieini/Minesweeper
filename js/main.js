@@ -100,7 +100,7 @@ function createTimer() {
     if (gFirstClick) {
         var currTime = new Date();
         gStartTime = currTime.getTime();
-        gStartInt = setInterval(timer, 20);
+        gStartInt = setInterval(timer, 100);
     }
     gFirstClick = false;
 }
@@ -133,7 +133,7 @@ function cellClicked(i, j) {
         endOfTheGame();
     }
     // תנאי ניצחון
-    var isWin = checkIsVictory(gBoard);
+    var isWin = checkIsVictory();
     if (isWin) {
         var elSmile = document.querySelector('.smile');
         elSmile.innerText = COOL_FACE;
@@ -159,14 +159,10 @@ function renderMines() {
     for (let i = 0; i < gLevel.MINES; i++) {
         var iRnd = getRandomIntInclusive(0, gLevel.SIZE - 1);
         var jRnd = getRandomIntInclusive(0, gLevel.SIZE - 1);
-        console.log('gboard: ', gBoard);
         var currCell = gBoard[iRnd][jRnd];
-        console.log(currCell);
         currCell.isMine = true;
     }
 }
-
-
 
 // פונקציה מובנית
 function getRandomIntInclusive(min, max) {
@@ -174,7 +170,6 @@ function getRandomIntInclusive(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
 
 // אחראית על טיימר
 function timer() {
@@ -185,12 +180,10 @@ function timer() {
     elTime.innerText = `${timeOnScreen}`;
 }
 
-
 // בודק אם יש הפסד
 function checkGameOver() {
-    if (gNumLives === 0) return true
+    return gNumLives === 0;
 }
-
 
 // חושף את כל התאים
 function showAllCells() {
@@ -203,30 +196,33 @@ function showAllCells() {
 
 
 // בודק אם יש ניצחון
-function checkIsVictory(board) {
+function checkIsVictory() {
     var allMarkedOrShow = true;
     var markedCounter = 0;
-    for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board.length; j++) {
+    var mineCounter = 0;
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard.length; j++) {
             var currCell = gBoard[i][j];
-            console.log(currCell);
-            if (currCell.isMarked) {
-                markedCounter++;
-            }
             if (!currCell.isMarked && !currCell.isShown) {
                 allMarkedOrShow = false;
             }
             if (!currCell.isShown) {
                 allMarkedOrShow = false
             }
+            if (currCell.isMine) {
+                mineCounter++;
+            }
+            if (currCell.isMarked) {
+                markedCounter++;
+            }
         }
     }
-    if (markedCounter !== gLevel.MINES) {
+    if (markedCounter + mineCounter !== gLevel.MINES || mineCounter > 2) {
         allMarkedOrShow = false;
     }
     return allMarkedOrShow;
 }
-
+// (>2 mines) + ()
 
 // לשחק שוב
 function playAgain() {
@@ -255,4 +251,8 @@ function numOfLives() {
     var elLives = document.querySelector('.lives');
     elLives.innerText = live;
 }
+
+//  צריך לתקן את התנאי ניצחון . מראה רק ניצחון
+// תיקון כפתור לשחק שוב שירנדק את החיים
+// להחליף את פונקציית הטיימר
 
