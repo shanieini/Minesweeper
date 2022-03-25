@@ -128,6 +128,9 @@ function cellClicked(i, j) {
         removeLive();
     } else {
         gGame.shownCount++;
+        if (currCell.minesAroundCount === 0) {
+            openEmptyCells(i, j);
+        }
     }
     // תנאי הפסד
     var isLose = checkGameOver();
@@ -199,8 +202,7 @@ function timer() {
 
 // בודק אם יש הפסד
 function checkGameOver() {
-    if (gNumLives === 0)
-        return true
+    return gNumLives === 0
 }
 
 // חושף את כל התאים
@@ -212,12 +214,14 @@ function showAllCells() {
     }
 }
 
-// 16 === 14 + 1 + 1
-
 // בודק אם יש ניצחון
 function checkIsVictory() {
     var mineIndicate = gGame.markedCount + (3 - gNumLives);
     var boardSize = gLevel.SIZE * gLevel.SIZE;
+    console.log('boardSize: ', boardSize);
+    console.log('gGame.markedCount: ', gGame.markedCount);
+    console.log('safe: ', (3 - gNumLives));
+    console.log('gGame.shownCoun: ', gGame.shownCount);
     if (boardSize === gGame.shownCount + mineIndicate) {
         return true;
     }
@@ -231,10 +235,9 @@ function playAgain() {
     gFirstClick = true;
     clearInterval(gStartInt)
     var elTime = document.querySelector('.time');
-    elTime.innerText = 0;
+    elTime.innerText = 'Time';
     init()
 }
-
 
 // בחירת רמות
 function pressBtn(num, mines) {
@@ -243,12 +246,11 @@ function pressBtn(num, mines) {
     gFirstClick = true;
     clearInterval(gStartInt)
     var elTime = document.querySelector('.time');
-    elTime.innerText = 0;
+    elTime.innerText = 'Time';
     gLevel.SIZE = num;
     gLevel.MINES = mines
     init();
 }
-
 
 function removeLive() {
     // model:
@@ -266,8 +268,19 @@ function renderLives() {
     elLives.innerText = strHtml;
 }
 
+function openEmptyCells(cellI, cellJ) {
+    // model:
+    for (var i = cellI - 1; i <= cellI + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue;
+        for (var j = cellJ - 1; j <= cellJ + 1; j++) {
+            if (i === cellI && j === cellJ) continue;
+            if (j < 0 || j >= gBoard[i].length) continue;
+            gBoard[i][j].isShown = true;
+            gGame.shownCount++;
+        }
+    }
+    // DOM:
+    renderBoard(gBoard);
+}
 
-//  צריך לתקן את התנאי ניצחון . מראה רק ניצחון
-// תיקון כפתור לשחק שוב שירנדק את החיים
-// להחליף את פונקציית הטיימר
 
