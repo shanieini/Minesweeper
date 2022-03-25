@@ -24,6 +24,10 @@ var gBoard;
 
 // פונקציית איתחול
 function init() {
+    gNumLives = 3;
+    renderLives();
+    gGame.shownCount = 0;
+    gGame.markedCount = 0;
     gBoard = createBoard(gLevel.SIZE);
     renderMines();
     renderBoard(gBoard);
@@ -78,7 +82,6 @@ function renderBoard(board) {
     }
     var elTable = document.querySelector('.board');
     elTable.innerHTML = strHTML;
-    numOfLives()
 }
 
 // סופר כמה מוקשים יש מסביב לתא
@@ -115,15 +118,16 @@ function endOfTheGame() {
 
 // לחיצה על תא עם מקש שמאלי
 function cellClicked(i, j) {
-    CLICK_SOUND.play();
-    // gGame.shownCount++
-    createTimer();
     var currCell = gBoard[i][j];
+    if (currCell.isShown) return;
+    CLICK_SOUND.play();
+    createTimer();
     currCell.isShown = true;
     if (currCell.isMine) {
-        gNumLives--
+        removeLive();
+    } else {
+        gGame.shownCount++;
     }
-    renderBoard(gBoard);
     // תנאי הפסד
     var isLose = checkGameOver();
     if (isLose) {
@@ -140,16 +144,28 @@ function cellClicked(i, j) {
         WIN_SOUND.play();
         endOfTheGame();
     }
+    renderBoard(gBoard);
 }
 
 // לחיצה על תא מקש ימני
 function cellRightClicked(i, j) {
     window.event.preventDefault();
+    var currCell = gBoard[i][j];
+    if (currCell.isShown) return;
     createTimer();
-    gBoard[i][j].isMarked = !gBoard[i][j].isMarked;
-    if (gBoard[i][j].isMarked) {
-        gBoard[i][j].isShown = false;
-        // gGame.markedCount++
+    if (currCell.isMarked) {
+        currCell.isMarked = false;
+        gGame.markedCount--;
+    } else {
+        currCell.isMarked = true;
+        gGame.markedCount++;
+    }
+    var isWin = checkIsVictory();
+    if (isWin) {
+        var elSmile = document.querySelector('.smile');
+        elSmile.innerText = COOL_FACE;
+        WIN_SOUND.play();
+        endOfTheGame();
     }
     renderBoard(gBoard);
 }
@@ -182,7 +198,8 @@ function timer() {
 
 // בודק אם יש הפסד
 function checkGameOver() {
-    return gNumLives === 0;
+    if (gNumLives === 0)
+        return true
 }
 
 // חושף את כל התאים
@@ -194,35 +211,17 @@ function showAllCells() {
     }
 }
 
+// 16 === 14 + 1 + 1
 
 // בודק אם יש ניצחון
 function checkIsVictory() {
-    var allMarkedOrShow = true;
-    var markedCounter = 0;
-    var mineCounter = 0;
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard.length; j++) {
-            var currCell = gBoard[i][j];
-            if (!currCell.isMarked && !currCell.isShown) {
-                allMarkedOrShow = false;
-            }
-            if (!currCell.isShown) {
-                allMarkedOrShow = false
-            }
-            if (currCell.isMine) {
-                mineCounter++;
-            }
-            if (currCell.isMarked) {
-                markedCounter++;
-            }
-        }
+    var mineIndicate = gGame.markedCount + (3 - gNumLives);
+    var boardSize = gLevel.SIZE * gLevel.SIZE;
+    if (boardSize === gGame.shownCount + mineIndicate) {
+        return true;
     }
-    if (markedCounter + mineCounter !== gLevel.MINES || mineCounter > 2) {
-        allMarkedOrShow = false;
-    }
-    return allMarkedOrShow;
+    return false;
 }
-// (>2 mines) + ()
 
 // לשחק שוב
 function playAgain() {
@@ -238,19 +237,26 @@ function pressBtn(num, mines) {
     elSmile.innerText = HAPPY_FACE;
     gLevel.SIZE = num;
     gLevel.MINES = mines
-    init()
-
+    init();
 }
 
 
-function numOfLives() {
-    var live = '';
+function removeLive() {
+    // model:
+    gNumLives--;
+    //DOM:
+    renderLives();
+}
+
+function renderLives() {
+    var strHtml = '';
     for (var i = 0; i < gNumLives; i++) {
-        live += LIFE;
+        strHtml += LIFE;
     }
     var elLives = document.querySelector('.lives');
-    elLives.innerText = live;
+    elLives.innerText = strHtml;
 }
+
 
 //  צריך לתקן את התנאי ניצחון . מראה רק ניצחון
 // תיקון כפתור לשחק שוב שירנדק את החיים
