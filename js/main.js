@@ -113,6 +113,7 @@ function createTimer() {
 function endOfTheGame() {
     clearInterval(gStartInt);
     showAllCells();
+    gFirstClick = true;
     renderBoard(gBoard);
 }
 
@@ -227,6 +228,10 @@ function checkIsVictory() {
 function playAgain() {
     var elSmile = document.querySelector('.smile');
     elSmile.innerText = HAPPY_FACE;
+    gFirstClick = true;
+    clearInterval(gStartInt)
+    var elTime = document.querySelector('.time');
+    elTime.innerText = 0;
     init()
 }
 
@@ -235,6 +240,10 @@ function playAgain() {
 function pressBtn(num, mines) {
     var elSmile = document.querySelector('.smile');
     elSmile.innerText = HAPPY_FACE;
+    gFirstClick = true;
+    clearInterval(gStartInt)
+    var elTime = document.querySelector('.time');
+    elTime.innerText = 0;
     gLevel.SIZE = num;
     gLevel.MINES = mines
     init();
