@@ -1,5 +1,4 @@
 'use strict'
-// אייקונים
 const MINE = '💣';
 const FLAG = '🚩';
 const HAPPY_FACE = '🙂';
@@ -11,7 +10,6 @@ const WIN_SOUND = new Audio('sound/win.wav');
 const CLICK_SOUND = new Audio('sound/click.wav');
 const OVER_SOUND = new Audio('sound/over.wav');
 
-// גלובליים
 var gStartInt;
 var gStartTime;
 var gFirstClick = true;
@@ -22,7 +20,6 @@ var gLevel = { SIZE: 4, MINES: 2 };
 var gGame = { isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 };
 var gBoard;
 
-// פונקציית איתחול
 function init() {
     gNumLives = 3;
     renderLives();
@@ -33,8 +30,6 @@ function init() {
     renderBoard(gBoard);
 }
 
-
-// פונקציית בניית הלוח
 function createBoard(boardSize) {
     var board = [];
     for (var i = 0; i < boardSize; i++) {
@@ -46,8 +41,6 @@ function createBoard(boardSize) {
     return board;
 }
 
-
-// פונקצייה בדיקות
 function getCellRender(cell) {
     if (cell.isShown) {
         return cell.isMine ? MINE : (cell.minesAroundCount === 0 ? EMPTY : cell.minesAroundCount);
@@ -58,14 +51,10 @@ function getCellRender(cell) {
     }
 }
 
-
-// מחזירה אלמנט
 function getElementsFromLocation(i, j) {
     return document.querySelector(`.cell-${i}-${j}`);
 }
 
-
-// פונקצייה האחראית על רינדור
 function renderBoard(board) {
     var strHTML = '';
     for (var i = 0; i < board.length; i++) {
@@ -84,7 +73,6 @@ function renderBoard(board) {
     elTable.innerHTML = strHTML;
 }
 
-// סופר כמה מוקשים יש מסביב לתא
 function setMinesNegsCount(cellI, cellJ, board) {
     var neighborsMineCount = 0;
     for (var i = cellI - 1; i <= cellI + 1; i++) {
@@ -98,7 +86,6 @@ function setMinesNegsCount(cellI, cellJ, board) {
     return neighborsMineCount;
 }
 
-// פונקצייה שמפעילה את הטיימר
 function createTimer() {
     if (gFirstClick) {
         var currTime = new Date();
@@ -108,8 +95,6 @@ function createTimer() {
     gFirstClick = false;
 }
 
-
-// תנאים לסיום המשחק
 function endOfTheGame() {
     clearInterval(gStartInt);
     showAllCells();
@@ -117,7 +102,6 @@ function endOfTheGame() {
     renderBoard(gBoard);
 }
 
-// לחיצה על תא עם מקש שמאלי
 function cellClicked(i, j) {
     var currCell = gBoard[i][j];
     if (currCell.isShown) return;
@@ -126,13 +110,16 @@ function cellClicked(i, j) {
     currCell.isShown = true;
     if (currCell.isMine) {
         removeLive();
+
     } else {
         gGame.shownCount++;
+        console.log('left click: ', gGame.shownCount);
         if (currCell.minesAroundCount === 0) {
             openEmptyCells(i, j);
+
         }
     }
-    // תנאי הפסד
+
     var isLose = checkGameOver();
     if (isLose) {
         var elSmile = document.querySelector('.smile');
@@ -140,7 +127,7 @@ function cellClicked(i, j) {
         OVER_SOUND.play();
         endOfTheGame();
     }
-    // תנאי ניצחון
+
     var isWin = checkIsVictory();
     if (isWin) {
         var elSmile = document.querySelector('.smile');
@@ -151,7 +138,6 @@ function cellClicked(i, j) {
     renderBoard(gBoard);
 }
 
-// לחיצה על תא מקש ימני
 function cellRightClicked(i, j) {
     window.event.preventDefault();
     var currCell = gBoard[i][j];
@@ -174,7 +160,6 @@ function cellRightClicked(i, j) {
     renderBoard(gBoard);
 }
 
-// פונקציה שמרנדרת מוקשים במקום רנדומלי
 function renderMines() {
     for (let i = 0; i < gLevel.MINES; i++) {
         var iRnd = getRandomIntInclusive(0, gLevel.SIZE - 1);
@@ -184,14 +169,12 @@ function renderMines() {
     }
 }
 
-// פונקציה מובנית
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-// אחראית על טיימר
 function timer() {
     var currTime = new Date();
     var time = currTime.getTime();
@@ -200,12 +183,10 @@ function timer() {
     elTime.innerText = `${timeOnScreen}`;
 }
 
-// בודק אם יש הפסד
 function checkGameOver() {
     return gNumLives === 0
 }
 
-// חושף את כל התאים
 function showAllCells() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {
@@ -214,7 +195,6 @@ function showAllCells() {
     }
 }
 
-// בודק אם יש ניצחון
 function checkIsVictory() {
     var mineIndicate = gGame.markedCount + (3 - gNumLives);
     var boardSize = gLevel.SIZE * gLevel.SIZE;
@@ -228,7 +208,6 @@ function checkIsVictory() {
     return false;
 }
 
-// לשחק שוב
 function playAgain() {
     var elSmile = document.querySelector('.smile');
     elSmile.innerText = HAPPY_FACE;
@@ -239,7 +218,6 @@ function playAgain() {
     init()
 }
 
-// בחירת רמות
 function pressBtn(num, mines) {
     var elSmile = document.querySelector('.smile');
     elSmile.innerText = HAPPY_FACE;
@@ -275,8 +253,13 @@ function openEmptyCells(cellI, cellJ) {
         for (var j = cellJ - 1; j <= cellJ + 1; j++) {
             if (i === cellI && j === cellJ) continue;
             if (j < 0 || j >= gBoard[i].length) continue;
-            gBoard[i][j].isShown = true;
-            gGame.shownCount++;
+            if (gBoard[i][j].isShown === false) {
+                gBoard[i][j].isShown = true;
+                gGame.shownCount++;
+                console.log('i: ', i);
+                console.log('j: ', j);
+                console.log('gGame.showncount At Empty Cell: ', gGame.shownCount);
+            }
         }
     }
     // DOM:
